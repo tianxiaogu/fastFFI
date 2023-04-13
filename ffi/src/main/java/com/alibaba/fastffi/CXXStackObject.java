@@ -48,7 +48,7 @@ public class CXXStackObject<T extends CXXPointer> implements AutoCloseable {
             pointer.delete();
             closed = true;
         } else {
-            throw new IllegalStateException("Cannot delete a FFIPoitner twice: " + pointer);
+            throw new IllegalStateException("Cannot delete a FFIPointer twice: " + pointer);
         }
     }
 }

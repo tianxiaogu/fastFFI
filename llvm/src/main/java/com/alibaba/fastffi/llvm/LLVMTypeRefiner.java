@@ -56,7 +56,7 @@ public class LLVMTypeRefiner {
             case ConstantIntVal:
                 return ConstantInt.dyn_cast(v);
             case ConstantFPVal:
-                return ConstantFP.dyn_cast(v);
+                return null; // ConstantFP.cast(v);
             case ConstantPointerNullVal:
                 return ConstantPointerNull.dyn_cast(v);
             case ConstantTokenNoneVal:

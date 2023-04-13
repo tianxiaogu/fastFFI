@@ -17,6 +17,7 @@ package com.alibaba.fastffi.llvm;
 
 import com.alibaba.fastffi.CXXHead;
 import com.alibaba.fastffi.CXXValue;
+import com.alibaba.fastffi.FFIExpr;
 import com.alibaba.fastffi.FFIGen;
 import com.alibaba.fastffi.FFITypeAlias;
 
@@ -30,20 +31,16 @@ public interface ConstantFP extends ConstantData {
     }
 
     static ConstantFP cast(Value value) {
-        return ValueCasting.INSTANCE.cast(value, (ConstantFP) null);
+        return null; // ValueCasting.INSTANCE.cast(value, (ConstantFP) null);
     }
 
     static ConstantFP dyn_cast(Value value) {
-        return ValueCasting.INSTANCE.dyn_cast(value, (ConstantFP) null);
+        return null; // ValueCasting.INSTANCE.dyn_cast(value, (ConstantFP) null);
     }
 
-    @CXXValue APFloat getValue();
+    @FFIExpr("{0}->getValue().convertToFloat()")
+    float getFloat();
 
-    default float getFloat() {
-        return getValue().convertToFloat();
-    }
-
-    default double getDouble() {
-        return getValue().convertToDouble();
-    }
+    @FFIExpr("{0}->getValue().convertToDouble()")
+    double getDouble();
 }

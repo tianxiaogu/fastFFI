@@ -119,47 +119,45 @@ public class Main {
         Logger.initialize(options);
         Map<String, InputClass> classes = collectNativeMethods(options.getClassPath());
 
-        try (CXXStackObject<LLVMContext> contextObject = new CXXStackObject<>(LLVMContext.newContext())) {
-            Path[] classPath = options.getClassPath();
-            Path bitcodePath = options.getBitcodePath();
-            Path libraryPath = options.getLibraryPath();
+        Path[] classPath = options.getClassPath();
+        Path bitcodePath = options.getBitcodePath();
+        Path libraryPath = options.getLibraryPath();
 
-            LLVMContext context = contextObject.get();
-            Module module;
-            if (bitcodePath == null) {
-                module = BitcodeParser.parseEmbeddedBitcode(context, libraryPath.toString());
-            } else {
-                module = BitcodeParser.parseBitcodeFile(context, bitcodePath.toString());
-            }
-            if (module == null) {
-                exitAndPrintUsage("cannot parse bitcode module");
-            }
-            String moduleName = options.getModuleName();;
-            if (moduleName == null) {
-                if (libraryPath != null) {
-                    moduleName = libraryPath.getFileName().toString();
-                } else {
-                    moduleName = module.getName().toJavaString();
-                }
-            }
-            Universe universe = new Universe(options, module, moduleName, classes, libraryPath, classPath);
-            Map<String, Function> namesToFD = new HashMap<>();
-            module.forEachFunction(function -> {
-                if (function.hasExactDefinition()) {
-                    String name = function.getName();
-                    if (namesToFD.put(name, function) != null) {
-                        Logger.warn("Duplicated function: " + name);
-                    } else {
-                        Logger.info("Find function: " + name);
-                    }
-                }
-            });
-
-            Path outputPath = options.getOutputPath();
-            universe.lookupNativeMethods(namesToFD);
-            universe.save(outputPath.toAbsolutePath());
-            universe.dump();
+        LLVMContext context = LLVMContext.newContext();
+        Module module;
+        if (bitcodePath == null) {
+            module = BitcodeParser.parseEmbeddedBitcode(context, libraryPath.toString());
+        } else {
+            module = BitcodeParser.parseBitcodeFile(context, bitcodePath.toString());
         }
+        if (module == null) {
+            exitAndPrintUsage("cannot parse bitcode module");
+        }
+        String moduleName = options.getModuleName();;
+        if (moduleName == null) {
+            if (libraryPath != null) {
+                moduleName = libraryPath.getFileName().toString();
+            } else {
+                moduleName = module.getName().toJavaString();
+            }
+        }
+        Universe universe = new Universe(options, module, moduleName, classes, libraryPath, classPath);
+        Map<String, Function> namesToFD = new HashMap<>();
+        module.forEachFunction(function -> {
+            if (function.hasExactDefinition()) {
+                String name = function.getName();
+                if (namesToFD.put(name, function) != null) {
+                    Logger.warn("Duplicated function: " + name);
+                } else {
+                    Logger.info("Find function: " + name);
+                }
+            }
+        });
+
+        Path outputPath = options.getOutputPath();
+        universe.lookupNativeMethods(namesToFD);
+        universe.save(outputPath.toAbsolutePath());
+        universe.dump();
     }
 
     private static void exitAndPrintUsage() {
